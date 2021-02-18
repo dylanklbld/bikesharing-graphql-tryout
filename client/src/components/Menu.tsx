@@ -85,12 +85,6 @@ const Menu = ({ text, onClick, mapInfo }:MenuProps) => {
         setOpen(!open)
     }
 
-    useEffect(()=>{
-        return ()=>{
-            console.log("WTF WHY I AM UNMOUNT")
-        }
-    },[])
-
   return <Fragment>
     <MenuLabel>
         <Icon clicked={open} onClick={handleOpenMenu}/>

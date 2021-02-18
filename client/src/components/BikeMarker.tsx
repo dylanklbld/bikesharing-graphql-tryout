@@ -1,7 +1,5 @@
-import React, { ReactChildren, ReactNodeArray } from 'react';
-
 import { Coords } from 'google-map-react';
-import { UserContext } from '../contextProviders/UserContextProviders'
+import React from 'react';
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
@@ -10,7 +8,7 @@ const Wrapper = styled.div`
   left: 50%;
   width: 18px;
   height: 18px;
-  background-color: ${(props:MarkerProps) => (props.rented ? '#71acbc75' : '#61dafb')};
+  background-color: ${(props:MarkerProps) => (props.rented ? (props.mine ? '#71acbc75' : '#9e9e9e') : '#61dafb')};
   border: 1px solid ${(props:MarkerProps) => (props.rented ? '#71acbc75' : '#fff')};
   border-radius: 100%;
   user-select: none;
@@ -23,7 +21,7 @@ const Wrapper = styled.div`
 
 type MarkerProps = {
     type?:string,
-    text?:string,
+    mine:boolean,
     onClick?:()=>void,
     rented: boolean,
     children?: React.ReactNode
@@ -31,8 +29,8 @@ type MarkerProps = {
 
 type BikeMarkerProps = MarkerProps & Coords
 
-const Marker = ({ text, onClick, rented, children}:BikeMarkerProps) => (
-  <Wrapper onClick={onClick} rented={rented}>
+const Marker = ({ mine, onClick, rented, children}:BikeMarkerProps) => (
+  <Wrapper onClick={onClick} rented={rented} mine={mine}>
     <div>{children}</div>
   </Wrapper>
 );

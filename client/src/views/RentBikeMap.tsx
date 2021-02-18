@@ -6,6 +6,7 @@ import GoogleMapReact from 'google-map-react';
 import Menu from '../components/Menu'
 import PopupBubble from '../components/PopupBubble'
 import ReactDOM from 'react-dom'
+import { UserContext } from '../contextProviders/UserContextProviders'
 
 const BIKES = gql`
   query GetBikes {
@@ -67,6 +68,7 @@ const RentBikeMap = (props: any) => {
     const { data: updatedBulkBikesData } = useSubscription(BIKES_DATA_SUBSCRIPTION)
 
     const [data, setData] = useState<any>(()=>allBikesData)
+    const { user } = useContext(UserContext)
 
     useEffect(() => {
         const { bikeStatusChanged } = updatedBikeStatusData || {}
@@ -135,10 +137,11 @@ const RentBikeMap = (props: any) => {
                 onGoogleApiLoaded={({ map }) => handleApiLoaded(map)}
                 yesIWantToUseGoogleMapApiInternals
             >
-                {data?.bikes?.map(({ id, name, rented, latitude, longitude, user }: any) => (
+                {data?.bikes?.map(({ id, name, rented, latitude, longitude, user: bikeUser }: any) => (
                     <BikeMarker
                         type={bikeMarkerType}
                         key={id}
+                        mine={user?.id === bikeUser?.id}
                         lat={latitude}
                         lng={longitude}
                         rented={rented}
