@@ -86,8 +86,8 @@ const Menu = ({ text, onClick, mapInfo }:MenuProps) => {
     }
 
   return <Fragment>
-    <MenuLabel>
-        <Icon clicked={open} onClick={handleOpenMenu}/>
+    <MenuLabel onClick={handleOpenMenu}>
+        <Icon clicked={open} />
         <MenuSidebar className={open ? 'open' : 'closed'}>
             {open && <DebugMenu appInfoData={mapInfo}/>}
         </MenuSidebar>

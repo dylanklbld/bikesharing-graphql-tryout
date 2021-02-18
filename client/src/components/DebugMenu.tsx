@@ -7,7 +7,6 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
     display: flex;
     flex-direction: column;
-    height: 50%;
     justify-content: center;
     align-items: center;
 `;
@@ -89,6 +88,7 @@ const DebugMenu = ({ appInfoData }:DebugMenuProps) => {
 
 
   return <Wrapper>
+    <h5>For easier debugging</h5>
     <Button onClick={handleDropRent}>Reset all rents</Button>
     <Button onClick={handleBikesReset}>Reset bikes</Button>
     <Button onClick={handlePlaceBike}>Place new bike(s) somewhere nearby</Button>
