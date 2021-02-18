@@ -5,11 +5,11 @@
   "license": "MIT",
   "scripts": {
     "prerun-mongodb": "docker pull mongo",
-    "run-mongodb": "docker run -d  --name mongo-on-docker  -p 27888:27017 -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret mongo",
+    "run-mongodb": "docker container inspect mongo-on-docker || docker run -d  --name mongo-on-docker  -p 27888:27017 -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret mongo",
     "postrun-mongodb": "./init/buildMongo.sh",
     "start-server": "cd server && yarn watch",
     "start-client": "cd client && yarn start",
-    "start": "yarn run-mongodb && yarn start-server & yarn start-client"
+    "start": "yarn run-mongodb && yarn start-server && yarn start-client"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
