@@ -4,14 +4,14 @@ import { gql, useQuery } from '@apollo/client';
 const USER = gql`
   query GetActualUser {
     actualUser {
-      id,
+      id
     }
   }
 `;
 
 interface UserContextType {
   user: any,
-  refetchUser?: () => void,
+  refetchUser?: () => Promise<any>,
   error?: any
 }
 

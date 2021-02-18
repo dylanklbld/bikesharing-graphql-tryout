@@ -1,5 +1,7 @@
 import { Document, Model, Schema, model } from 'mongoose';
 
+import { IBike } from './Bike';
+
 export interface ISessionUser extends Document {
   name: string;
   created: Date;

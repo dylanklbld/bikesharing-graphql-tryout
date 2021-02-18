@@ -16,8 +16,6 @@ export const createNewSessionUser = async (name, sessionKey) => {
         expires: getExpireDate(createdAt, 1)
     });
     
-    console.warn("USER", name, sessionKey)
-
     await sessionUser.save();
     return sessionUser
 }

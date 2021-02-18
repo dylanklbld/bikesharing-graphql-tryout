@@ -2,6 +2,7 @@ import { Bike } from "../models/Bike";
 import { PubSub } from 'apollo-server-express'
 import { User } from "../models/User";
 import { createNewSessionUser } from "../middlewares/initializeUserMiddleware"
+import humanNames from 'human-names'
 
 const pubsub = new PubSub();
 
@@ -77,12 +78,62 @@ export const resolvers = {
             const query = { rented: true };
             await Bike.updateMany(query, {rented:false, user: null}).exec()
 
-            return await Bike.find().exec()
+            const allTheBikes = await Bike.find().populate('user').exec()
+
+            pubsub.publish('BIKES_DATA_UPDATE', {bikesDataBulkUpdate: allTheBikes})
+
+            return allTheBikes
+        },
+        resetBikesData: async()=>{
+            await Bike.deleteMany().exec()
+            await Bike.insertMany([
+                {
+                  name: "Henry",
+                  latitude: 50.119504,
+                  longitude: 8.638137,
+                  rented: false,
+                },
+                { name: "Hans", latitude: 50.119229, longitude: 8.64002, rented: false },
+                {
+                  name: "Thomas",
+                  latitude: 50.120452,
+                  longitude: 8.650507,
+                  rented: false,
+                },
+              ])
+              
+            const allTheBikes = await Bike.find().populate('user').exec()
+
+            pubsub.publish('BIKES_DATA_UPDATE', {bikesDataBulkUpdate: allTheBikes})
+
+            return allTheBikes
+        },
+        placeNewBike: async(_, {coords}) => {
+            const {latitude, longitude} = coords
+            // random German name
+            const name = humanNames.maleDe[Math.floor(Math.random() * Math.floor(68))]
+            const bike = new Bike({
+                name,
+                latitude,
+                longitude,
+                rented: false
+            });
+            
+            await bike.save();
+
+            // quick and dirty soluition
+            const allTheBikes = await Bike.find().populate('user').exec()
+            pubsub.publish('BIKES_DATA_UPDATE', {bikesDataBulkUpdate: allTheBikes})
+            
+            return bike
         }
     },
     Subscription: {
         bikeStatusChanged:{
             subscribe: () => pubsub.asyncIterator(['BIKE_STATUS_UPDATE'])
+        },
+        bikesDataBulkUpdate:{
+            subscribe: () => pubsub.asyncIterator(['BIKES_DATA_UPDATE'])
         },
     }
 };

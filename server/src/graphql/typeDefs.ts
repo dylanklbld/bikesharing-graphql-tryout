@@ -31,13 +31,20 @@ export const typeDefs = gql`
     id: ID!,
     name: String
   }
+  input CoordsInput {
+    latitude: Float,
+    longitude: Float
+  }
   type Mutation {
     createUser(name: String!, sessionKey: String!): User!
     rentBikeStart(bike: BikeInput): Bike!
-    rentBikeFinish(bike: BikeInput): Bike!
-    dropAllRents: [Bike]!
+    rentBikeFinish(bike: BikeInput): Bike!,
+    placeNewBike(coords: CoordsInput): Bike!,
+    dropAllRents: [Bike]!,
+    resetBikesData: [Bike]!
   }
   type Subscription {
-    bikeStatusChanged: Bike
+    bikeStatusChanged: Bike,
+    bikesDataBulkUpdate: [Bike]!
   }
 `;

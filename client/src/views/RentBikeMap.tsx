@@ -1,10 +1,11 @@
 import React, { ReactHTMLElement, useContext, useEffect, useRef, useState } from 'react';
 import { gql, useQuery, useSubscription } from '@apollo/client';
-import styled, {css} from 'styled-components';
 
 import BikeMarker from '../components/BikeMarker'
 import GoogleMapReact from 'google-map-react';
+import Menu from '../components/Menu'
 import PopupBubble from '../components/PopupBubble'
+import ReactDOM from 'react-dom'
 
 const BIKES = gql`
   query GetBikes {
@@ -34,6 +35,21 @@ const BIKE_STATUS_SUBSCRIPTION = gql`
   }
 `;
 
+const BIKES_DATA_SUBSCRIPTION = gql`
+  subscription OnBikesBulkDataUpdate {
+    bikesDataBulkUpdate {
+        id,
+        name,
+        rented,
+        latitude, 
+        longitude,
+        user {
+            id
+        }
+    }
+  }
+`;
+
 const mapCenterDefault = { lat: 50.119504, lng: 8.638137 }
 const zoomDefault = 15
 const googleMapsApiKey = 'AIzaSyDC5OzMwGhqNta8V1c473INMOXZrKiY9c8'
@@ -44,69 +60,100 @@ const RentBikeMap = (props: any) => {
     const [center, setCenter] = useState(mapCenterDefault);
     const [zoom, setZoom] = useState<number>(zoomDefault);
     const [selectedBikeInfo, setSelectedBikeInfo] = useState<any>(null)
-    
-    const { loading, error, data:allBikesData, refetch: refetchAllBikes } = useQuery(BIKES);
 
-    const {  data: updatedBikeStatusData } = useSubscription(BIKE_STATUS_SUBSCRIPTION);
+    const { data: allBikesData, refetch: refetchAllBikes } = useQuery(BIKES);
 
-    useEffect(()=>{
-        const {bikeStatusChanged} = updatedBikeStatusData || {}
-        
-        if(selectedBikeInfo && selectedBikeInfo?.id === bikeStatusChanged?.id){
-            setSelectedBikeInfo({...selectedBikeInfo, ...bikeStatusChanged})
+    const { data: updatedBikeStatusData } = useSubscription(BIKE_STATUS_SUBSCRIPTION);
+    const { data: updatedBulkBikesData } = useSubscription(BIKES_DATA_SUBSCRIPTION)
+
+    const [data, setData] = useState<any>(()=>allBikesData)
+
+    useEffect(() => {
+        const { bikeStatusChanged } = updatedBikeStatusData || {}
+
+        if (selectedBikeInfo && selectedBikeInfo?.id === bikeStatusChanged?.id) {
+            setSelectedBikeInfo({ ...selectedBikeInfo, ...bikeStatusChanged })
         }
 
         refetchAllBikes()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [updatedBikeStatusData])
 
-    const handleMarkerClick = (id:string) =>{
-        const bike = allBikesData?.bikes.find((b:any)=>b.id === id)
+    // if reset through subscription
+    useEffect(() => {
+        if (updatedBulkBikesData) {
+            const { bikesDataBulkUpdate: bikes } = updatedBulkBikesData
+            setData({ bikes })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [updatedBulkBikesData])
+
+    useEffect(() => {
+        if(allBikesData){
+            setData(allBikesData)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [allBikesData, refetchAllBikes])
+
+
+    const handleMarkerClick = (id: string) => {
+        const bike = data?.bikes.find((b: any) => b.id === id)
 
         setSelectedBikeInfo(bike)
     }
 
-    const handleMapAreaClick = ({event}:any) => {
+    const handleMapAreaClick = ({ event }: any) => {
         // since its outside of info bubble anyway
-        if(!popupRef.current?.contains(event.target))
+        if (!popupRef.current?.contains(event.target))
             setSelectedBikeInfo(null)
     }
 
-    const handleMapChildClick = (key:string, childProps:any) => {
+    const handleMapChildClick = (key: string, childProps: any) => {
         // checking for type, in case we have something else around
-        if(childProps?.type!== bikeMarkerType){
+        if (childProps?.type !== bikeMarkerType) {
             setSelectedBikeInfo(null)
         }
     }
 
-   
+    const buttonAdded = React.useRef<any>(null)
+    const controlButtonDiv = document.createElement('div');
+    const handleApiLoaded = (map: any) => {
+        if (!buttonAdded.current) {
+            buttonAdded.current = true
+            map.controls[google.maps.ControlPosition.TOP_LEFT].push(controlButtonDiv);
+        }
+    };
+
     return (
-        <div style={{ height: '100vh', width: '100%', position: 'relative'}}>
+        <div style={{ height: '100vh', width: '100%', position: 'relative' }}>
             <GoogleMapReact
                 onClick={handleMapAreaClick}
                 onChildClick={handleMapChildClick}
-                bootstrapURLKeys={{ key:  googleMapsApiKey}}
+                bootstrapURLKeys={{ key: googleMapsApiKey }}
                 defaultCenter={center}
                 defaultZoom={zoom}
+                onGoogleApiLoaded={({ map }) => handleApiLoaded(map)}
+                yesIWantToUseGoogleMapApiInternals
             >
-                {allBikesData?.bikes?.map(({ id, name, rented, latitude, longitude, user }: any) => (
+                {data?.bikes?.map(({ id, name, rented, latitude, longitude, user }: any) => (
                     <BikeMarker
                         type={bikeMarkerType}
                         key={id}
                         lat={latitude}
                         lng={longitude}
                         rented={rented}
-                        onClick={()=>handleMarkerClick(id)}
+                        onClick={() => handleMarkerClick(id)}
                     >
-                        {(id === selectedBikeInfo?.id) && 
-                        <div ref={popupRef}>
-                            <PopupBubble bikeData={selectedBikeInfo} onClose={()=>setSelectedBikeInfo(null)} />
-                        </div>}
+                        {(id === selectedBikeInfo?.id) &&
+                            <div ref={popupRef}>
+                                <PopupBubble bikeData={selectedBikeInfo} onClose={() => setSelectedBikeInfo(null)} />
+                            </div>}
                     </BikeMarker>
                 ))}
-                
             </GoogleMapReact>
-            
+            <div>
+               <Menu mapInfo={{center}}/>
+            </div>
         </div>
     );
 }

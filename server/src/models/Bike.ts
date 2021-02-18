@@ -2,7 +2,7 @@ import { Document, Model, Schema, model } from 'mongoose';
 
 import {ISessionUser} from './User'
 
-interface IBike extends Document {
+export interface IBike extends Document {
   name: string;
   latitude: number;
   longitude: number;
