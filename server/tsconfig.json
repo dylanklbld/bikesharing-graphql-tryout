@@ -1,0 +1,25 @@
+{
+  "compilerOptions" : {
+    "module" : "commonjs",
+    "target" : "es5",
+    "sourceMap" : true,
+    "esModuleInterop" : true,
+    "types" : ["jest", "node"],
+    "outDir" : "build",
+    "allowSyntheticDefaultImports" : true,
+    "moduleResolution" : "Node"
+  },
+  "exclude" : [
+    "node_modules",
+     ".idea", 
+     "build", 
+     "**/*.test.ts"
+  ],
+  "include" : ["src/*"],
+  "lib" : ["dom", "es2015", "es2017"],
+  "skipLibCheck": false,
+  "strict": false,
+  "noEmit": false,
+  "resolveJsonModule": true,
+  "isolatedModules": false,
+}

@@ -1,0 +1,8 @@
+// endpoints
+
+GET /user (get publicly available user data)
+// endpoint to retrieve all bicycles and their necessary information for the frontend application.
+GET /bikes/all (get all the posts)
+//
+POST /bikes/rent/{bike}
+POST /bikes/return/{bike}
