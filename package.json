@@ -9,7 +9,7 @@
     "postrun-mongodb": "./init/buildMongo.sh",
     "start-server": "cd server && yarn watch",
     "start-client": "cd client && yarn start",
-    "start": "yarn run-mongodb & yarn start-server & yarn start-client"
+    "start": "yarn run-mongodb && yarn start-server & yarn start-client"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
